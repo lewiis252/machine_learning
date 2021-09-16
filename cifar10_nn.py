@@ -121,27 +121,30 @@ def training_loop(n_epochs, optimizer, model, loss_fn, train_loader):
 
             loss_train += loss.item()
 
-        if epoch == 1 or epoch % 1 == 0:
-            epoch_list.append(epoch)
-            train_loss_list.append(loss_train / len(train_loader)) # to track loss
-            # get loss of validation data
-            with torch.no_grad():
-                loss_val = 0.0
-                for imgs, labels in val_loader:
-                    # move tensors to gpu if available
-                    imgs = imgs.to(device=device)
-                    labels = labels.to(device=device)
 
-                    outputs = model(imgs)
+        epoch_list.append(epoch)
+        train_loss_list.append(loss_train / len(train_loader)) # to track loss
+        # get loss of validation data
+        with torch.no_grad():
+            loss_val = 0.0
+            for imgs, labels in val_loader:
+                # move tensors to gpu if available
+                imgs = imgs.to(device=device)
+                labels = labels.to(device=device)
 
-                    loss_v = loss_fn(outputs, labels)
+                outputs = model(imgs)
 
-                    loss_val += loss_v.item()
-            val_loss_list.append(loss_val / len(val_loader))
+                loss_v = loss_fn(outputs, labels)
 
-            print('{} Epoch {}, Training loss {}, Validation loss {}'.format(
-                datetime.datetime.now(), epoch,
-                loss_train / len(train_loader), loss_val/len(val_loader)))
+                loss_val += loss_v.item()
+        val_loss_list.append(loss_val / len(val_loader))
+
+
+
+        if epoch == 1 or epoch % 10 == 0:
+            print('Epoch {}, Training loss {}, Validation loss {}'.format(epoch,
+                                                                          loss_train / len(train_loader),
+                                                                          loss_val / len(val_loader)))
 
 def validate_on_test(model, train_loader, test_loader):
     for name, loader in [("train", train_loader), ("val", val_loader), ('test', test_loader)]:
@@ -164,7 +167,7 @@ def validate_on_test(model, train_loader, test_loader):
 
 n_epochs = 100
 model = Net().to(device=device)
-optimizer = optim.SGD(model.parameters(), lr=1e-2)
+optimizer = optim.ASGD(model.parameters(), lr=1e-2)
 loss_fn = nn.CrossEntropyLoss()
 train_loader = torch.utils.data.DataLoader(cifar10_train_, batch_size=64, shuffle=False)
 val_loader = torch.utils.data.DataLoader(cifar10_val_, batch_size=64, shuffle=False)
