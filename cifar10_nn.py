@@ -140,7 +140,7 @@ def training_loop(n_epochs, optimizer, model, loss_fn, train_loader):
         val_loss_list.append(loss_val / len(val_loader))
 
 
-
+        # set when to print info about training progress
         if epoch == 1 or epoch % 10 == 0:
             print('Epoch {}, Training loss {}, Validation loss {}'.format(epoch,
                                                                           loss_train / len(train_loader),
