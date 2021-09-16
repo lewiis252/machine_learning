@@ -60,4 +60,4 @@ def fit():
                     p -= p.grad * lr
                 model.zero_grad()
 
-model = Neural_network()
+model = Neural_network() #
