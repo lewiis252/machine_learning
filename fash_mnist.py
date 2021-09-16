@@ -143,7 +143,6 @@ for epoch in range(num_epochs):
             iteration_list.append(count)
             accuracy_list.append(accuracy)
 
-        if not (count % 500):
             print("Iteration: {}, Loss: {}, Accuracy: {}%".format(count, loss.data, accuracy))
 
 plt.plot(iteration_list, loss_list)

@@ -13,7 +13,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 # DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
-HOUSING_PATH = os.path.join("datasets", "housing")
+HOUSING_PATH = os.path.join("data", "housing")
 # HOUSING_URL = DOWNLOAD_ROOT + "datasets/housing/housing.tgz"
 
 # def fetch_housing_data(housing_url=HOUSING_URL, housing_path=HOUSING_PATH):
