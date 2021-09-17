@@ -80,19 +80,24 @@ class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, padding=1) # convolution layer (in_chl, out_chl,...)
+        self.conv1_batchnorm = nn.BatchNorm2d(16)
         self.act1 = nn.Tanh() # activation function
         self.pool1 = nn.MaxPool2d(2) # pooling (kernel size 2x2)
         self.conv2 = nn.Conv2d(16, 8, kernel_size=3, padding=1)
+        self.conv2_batchnorm = nn.BatchNorm2d(8)
         self.act2 = nn.Tanh()
         self.pool2 = nn.MaxPool2d(2)
         self.fc1 = nn.Linear(8 * 8 * 8, 32) # first 8 from conv2, next 8's from pooling (32->16->8)
         self.act3 = nn.Tanh()
         self.fc2 = nn.Linear(32, 2)
+        # self.act4 = nn.Softmax(dim=1)
 
 
     def forward(self, x):
-        out = self.pool1(self.act1(self.conv1(x)))
-        out = self.pool2(self.act2(self.conv2(out)))
+        out = self.conv1_batchnorm(self.conv1(x))
+        out = self.pool1(((self.act1(out))))
+        out = self.conv2_batchnorm(self.conv2(out))
+        out = self.pool2(((self.act2(out))))
         out = out.view(-1, 8 * 8 * 8)  # not sure why reshape
         out = self.act3(self.fc1(out))
         out = self.fc2(out)
@@ -100,7 +105,8 @@ class Net(nn.Module):
 
 import datetime # to measure time
 
-def training_loop(n_epochs, optimizer, model, loss_fn, train_loader):
+def training_loop(n_epochs, optimizer, model, loss_fn, train_loader, epoch_num_of_no_improve):
+    epoch_no_improve = 0
     for epoch in range(1, n_epochs+1):
         loss_train = 0.0
         for imgs, labels in train_loader:
@@ -112,6 +118,11 @@ def training_loop(n_epochs, optimizer, model, loss_fn, train_loader):
             outputs = model(imgs)
 
             loss = loss_fn(outputs, labels)
+
+            l2_lambda = 0.001
+            l2_norm = sum(p.pow(2.0).sum()
+                          for p in model.parameters())
+            loss = loss + l2_lambda * l2_norm
 
             optimizer.zero_grad()
 
@@ -141,10 +152,27 @@ def training_loop(n_epochs, optimizer, model, loss_fn, train_loader):
 
 
         # set when to print info about training progress
-        if epoch == 1 or epoch % 10 == 0:
+        if epoch == 1 or epoch % 1 == 0:
             print('Epoch {}, Training loss {}, Validation loss {}'.format(epoch,
                                                                           loss_train / len(train_loader),
                                                                           loss_val / len(val_loader)))
+
+        # early stopping
+
+        if epoch > 1:
+            if val_loss_list[-1] >= val_loss_list[-2]:
+                epoch_no_improve += 1
+            else:
+                epoch_no_improve = 0
+
+        if epoch_no_improve == epoch_num_of_no_improve:
+            print('Early stopping:')
+            print('Epoch {}, Training loss {}, Validation loss {}'.format(epoch,
+                                                                          loss_train / len(train_loader),
+                                                                          loss_val / len(val_loader)))
+            break
+
+
 
 def validate_on_test(model, train_loader, test_loader):
     for name, loader in [("train", train_loader), ("val", val_loader), ('test', test_loader)]:
@@ -172,13 +200,15 @@ loss_fn = nn.CrossEntropyLoss()
 train_loader = torch.utils.data.DataLoader(cifar10_train_, batch_size=64, shuffle=False)
 val_loader = torch.utils.data.DataLoader(cifar10_val_, batch_size=64, shuffle=False)
 test_loader = torch.utils.data.DataLoader(cifar10_test_,  batch_size=64, shuffle=False)
+epoch_num_of_no_improve = 5
 
 training_loop(
     n_epochs = n_epochs,
     optimizer = optimizer,
     model = model,
     loss_fn = loss_fn,
-    train_loader = train_loader)
+    train_loader = train_loader,
+    epoch_num_of_no_improve=epoch_num_of_no_improve)
 
 validate_on_test(model, train_loader, test_loader)
 
