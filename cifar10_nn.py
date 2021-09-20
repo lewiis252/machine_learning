@@ -105,7 +105,7 @@ class Net(nn.Module):
 
 import datetime # to measure time
 
-def training_loop(n_epochs, optimizer, model, loss_fn, train_loader, epoch_num_of_no_improve):
+def training_loop(n_epochs, optimizer, model, loss_fn, train_loader, val_loader, epoch_num_of_no_improve):
     epoch_no_improve = 0
     for epoch in range(1, n_epochs+1):
         loss_train = 0.0
@@ -174,7 +174,7 @@ def training_loop(n_epochs, optimizer, model, loss_fn, train_loader, epoch_num_o
 
 
 
-def validate_on_test(model, train_loader, test_loader):
+def validate_on_test(model, train_loader, val_loader, test_loader):
     for name, loader in [("train", train_loader), ("val", val_loader), ('test', test_loader)]:
         correct = 0
         total = 0
@@ -208,9 +208,10 @@ training_loop(
     model = model,
     loss_fn = loss_fn,
     train_loader = train_loader,
+    val_loader = val_loader,
     epoch_num_of_no_improve=epoch_num_of_no_improve)
 
-validate_on_test(model, train_loader, test_loader)
+validate_on_test(model, train_loader, val_loader, test_loader)
 
 plt.plot(epoch_list, train_loss_list, color='blue', label='train_loss')
 plt.plot(epoch_list, val_loss_list, color='green', label='validation loss')
