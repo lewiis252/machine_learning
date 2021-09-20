@@ -90,7 +90,7 @@ plt.plot(epoch_list, train_loss_list, color='blue', label='train_loss')
 plt.xlabel('epoch')
 plt.ylabel('loss')
 plt.legend()
-plt.show()
+
 
 
 X_to_predict = torch.unsqueeze(torch.linspace(-5,30,10000), dim=1).to(device)
