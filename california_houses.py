@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -13,7 +14,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR, LinearSVR
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, r2_score
 # sns.set()
 
 DOWNLOAD_ROOT = "https://raw.githubusercontent.com/ageron/handson-ml2/master/"
@@ -234,28 +235,30 @@ print('Typical prediction error', np.sqrt(mse))
 # # print('Test accuracy', model.score(X_test, y_test))
 # # yfit = model.predict(X_test)
 #
-# '''KNeighbours Regression'''
-# print('\nKNeigbours Regression model')
-#
-# param_grid = {'pca__n_components': [4,5,6,7,8,9,10], 'kn__n_neighbors':np.arange(4,14),
-#               'kn__p':[1,2], 'kn__algorithm':['ball_tree', 'kd_tree', 'brute']}
-# pipe = Pipeline(steps=[('scaler', StandardScaler()),('pca', PCA(random_state=42)), ('kn', KNeighborsRegressor())])
-#
-# model = RandomizedSearchCV(pipe, param_grid, cv=5, n_jobs=-1, random_state=42)
-# model.fit(X_train, y_train)
-#
-# print("Best parameters: {}".format(model.best_params_))
-# print("Best cross-validation score: {:.2f}".format(model.best_score_))
-#
-# print('Train accuracy', model.score(X_train, y_train))
-# print('Test accuracy', model.score(X_test, y_test))
-# y_fit = model.predict(X_test)
-# mse = mean_squared_error(y_test, y_fit)
-# print('Typical prediction error', np.sqrt(mse))
-# # cvres = model.cv_results_
-# # scores = np.sqrt(-(cvres["mean_test_score"]))
-# # print(np.mean(scores))
-# # print(np.std(scores))
+'''KNeighbours Regression'''
+print('\nKNeigbours Regression model')
+
+param_grid = {'pca__n_components': [4,5,6,7,8,9,10], 'kn__n_neighbors':np.arange(4,14),
+              'kn__p':[1,2], 'kn__algorithm':['ball_tree', 'kd_tree', 'brute']}
+pipe = Pipeline(steps=[('scaler', StandardScaler()),('pca', PCA(random_state=42)), ('kn', KNeighborsRegressor())])
+
+model = RandomizedSearchCV(pipe, param_grid, cv=5, n_jobs=-1, random_state=42)
+model.fit(X_train, y_train)
+
+print("Best parameters: {}".format(model.best_params_))
+print("Best cross-validation score: {:.2f}".format(model.best_score_))
+
+print('Train accuracy', model.score(X_train, y_train))
+print('Test accuracy', model.score(X_test, y_test))
+
+y_fit = model.predict(X_test)
+
+mse = mean_squared_error(y_test, y_fit)
+print('Typical prediction error', np.sqrt(mse))
+# cvres = model.cv_results_
+# scores = np.sqrt(-(cvres["mean_test_score"]))
+# print(np.mean(scores))
+# print(np.std(scores))
 #
 # '''neural network'''
 # from sklearn.neural_network import MLPRegressor
