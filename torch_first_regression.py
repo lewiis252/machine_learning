@@ -36,8 +36,9 @@ val_loss_list = []
 epoch_list = []
 
 n_features = 1
-hidden_neurons = 100
-hidden_neurons2 = 50
+hidden_neurons = 1000000
+hidden_neurons2 = hidden_neurons/2
+
 # network architecture
 class Net(nn.Module):
     def __init__(self):
@@ -65,13 +66,13 @@ def training_loop(n_epochs, optimizer, model, loss_fn, X, y):
 
 
         epoch_list.append(epoch)
-        train_loss_list.append(loss)
+        train_loss_list.append(loss.to('cpu').detach().numpy())
 
         # set when to print info about training progress
         if epoch == 1 or epoch % 100 == 0:
             print('Epoch {}, Training loss {}'.format(epoch, np.sqrt(loss.to('cpu').detach().numpy())))
 
-n_epochs = 250
+n_epochs = 1000
 model = Net().to(device=device)
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-2)
 loss_fn = nn.MSELoss()
@@ -93,8 +94,8 @@ plt.legend()
 
 
 
-X_to_predict = torch.unsqueeze(torch.linspace(-5,30,10000), dim=1).to(device)
-predict = model(X_to_predict)
+X_to_predict = torch.unsqueeze(torch.linspace(-5,30,1000), dim=1)
+predict = model(X_to_predict.to(device))
 
 
 plt.figure(3)
